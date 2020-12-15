@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My First Springboot</title>
+    <style>
+        #title {
+            text-align: center;
+
+            color: dark;
+        }
+    </style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+<h1 id="title" class="mb-5">Springboot application.</h1>
+<table id="usersList"></table>
+
+<br>
+<div class="form-group col-sm-2 mx-auto">
+    <form action="#">
+        <input class="form-control" id="user_name" class="input" type="text" placeholder="Username">
+        <input class="form-control" id="user_login" class="input" type="text" placeholder="Login">
+        <input class="form-control" id="user_email" class="input" type="text" placeholder="User email">
+    </form>
+    <button class="mt-1 btn btn-dark" onclick="createUser()">Create user</button>
+
+    <br><br>
+
+    <form action="#">
+        <input class="form-control" id="search_field" class="input" placeholder="Login">
+        <button class="mt-1 btn btn-dark" onclick="searchByLogin()">Search By Login</button>
+    </form>
+</div>
+<br>
+
+<script>
+function createUser() {
+    let userName = document.getElementById("user_name").value;
+    let userLogin = document.getElementById("user_login").value;
+    let userEmail = document.getElementById("user_email").value;
+
+    let xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", "http://localhost:8081/users/save");
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    xmlhttp.send(JSON.stringify({name: userName, login: userLogin, email: userEmail}));
+
+    loadUsers();
+}
+
+function loadUsers(){
+    let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if(this.readyState== 4 && this.status==200){
+            let users = JSON.parse(this.responseText);
+            let html = "<tr>" +
+                "<th>User id</th>" +
+                "<th>User name</th>" +
+                "<th>User login</th>" +
+                "<th>User email</th>" +
+                "<th>Delete</th>" +
+                "</tr>";
+            for(var i = 0; i < users.length; i++){
+                var user = users[i];
+                html = html + "<tr><td>" + user.id + "</td>" +
+                    "<td>" + user.name + "</td>" +
+                    "<td>" + user.login + "</td>" +
+                    "<td>" + user.email + "</td>" +
+                    "<td><button onclick='deleteUser(" + user.id + ")'>Delete</button></td></tr>";
+            }
+            document.getElementById("usersList").innerHTML = html;
+        }
+    };
+    xhttp.open("GET", "http://localhost:8081/users/findAll", true);
+    xhttp.send();
+}
+
+loadUsers();
+
+function searchByLogin() {
+    var login = document.getElementById("search_field").value;
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            var user = JSON.parse(this.responseText);
+            var html = '<tr>\n' +
+                '        <th>User id</th>\n' +
+                '        <th>User name</th>\n' +
+                '        <th>User login</th>\n' +
+                '        <th>User email</th>\n' +
+                '        <th>Delete</th>\n' +
+                '    </tr>';
+            html = html + '<tr><td>' + user.id + '</td>\n' +
+                '        <td>' + user.name + '</td>\n' +
+                '        <td>' + user.login + '</td>\n' +
+                '        <td>' + user.email + '</td>' +
+                '        <td><button onclick="deleteUser(' + user.id + ')">Delete</button></td></tr>';
+            document.getElementById("usersList").innerHTML = html;
+        }
+    };
+    xhttp.open("GET", "http://localhost:8081/users/findByLogin?login=" + login, true);
+    xhttp.send();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
